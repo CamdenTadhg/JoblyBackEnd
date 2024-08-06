@@ -201,7 +201,14 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
-        applications: [testJobIds[0]],
+        applications: [
+          {title: 'J1',
+            salary: 1,
+            equity: '0.1',
+            companyName: 'C1',
+            applied: true
+          }
+        ],
       },
     });
   });
@@ -217,7 +224,14 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
-        applications: [testJobIds[0]],
+        applications: [
+          {title: 'J1', 
+            salary: 1,
+            equity: '0.1',
+            companyName: 'C1',
+            applied: true
+          }
+        ],
       },
     });
   });
