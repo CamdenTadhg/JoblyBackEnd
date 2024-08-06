@@ -4,9 +4,10 @@
 
 const jsonschema = require("jsonschema");
 const express = require("express");
+const reactJWT = require('react-jwt');
 
 const { BadRequestError } = require("../expressError");
-const { ensureAdmin } = require("../middleware/auth");
+const { ensureAdmin, ensureLoggedIn } = require("../middleware/auth");
 const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
@@ -74,14 +75,17 @@ router.get("/", async function (req, res, next) {
 /** GET /[handle]  =>  { company }
  *
  *  Company is { handle, name, description, numEmployees, logoUrl, jobs }
- *   where jobs is [{ id, title, salary, equity }, ...]
+ *   where jobs is [{ id, title, salary, equity, applied }, ...]
  *
  * Authorization required: none
  */
 
-router.get("/:handle", async function (req, res, next) {
+router.get("/:handle", ensureLoggedIn, async function (req, res, next) {
   try {
-    const company = await Company.get(req.params.handle);
+    let token = req.headers.authorization;
+    token = token.slice(6);
+    let payload = reactJWT.decodeToken(token)
+    const company = await Company.get(req.params.handle, payload.username);
     return res.json({ company });
   } catch (err) {
     return next(err);

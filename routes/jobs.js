@@ -3,10 +3,11 @@
 /** Routes for jobs. */
 
 const jsonschema = require("jsonschema");
+const reactJWT = require('react-jwt');
 
 const express = require("express");
 const { BadRequestError } = require("../expressError");
-const { ensureAdmin } = require("../middleware/auth");
+const { ensureAdmin, ensureLoggedIn, authenticateJWT} = require("../middleware/auth");
 const Job = require("../models/job");
 const jobNewSchema = require("../schemas/jobNew.json");
 const jobUpdateSchema = require("../schemas/jobUpdate.json");
@@ -40,7 +41,7 @@ router.post("/", ensureAdmin, async function (req, res, next) {
 });
 
 /** GET / =>
- *   { jobs: [ { id, title, salary, equity, companyHandle, companyName }, ...] }
+ *   { jobs: [ { id, title, salary, equity, companyHandle, companyName, applied }, ...] }
  *
  * Can provide search filter in query:
  * - minSalary
@@ -50,9 +51,14 @@ router.post("/", ensureAdmin, async function (req, res, next) {
  * Authorization required: none
  */
 
-router.get("/", async function (req, res, next) {
+router.get("/", ensureLoggedIn, async function (req, res, next) {
   const q = req.query;
   // arrive as strings from querystring, but we want as int/bool
+  console.log(q.minSalary);
+  console.log(typeof q.minSalary);
+  let token = req.headers.authorization;
+  token = token.slice(6);
+  let payload = reactJWT.decodeToken(token)
   if (q.minSalary !== undefined) q.minSalary = +q.minSalary;
   q.hasEquity = q.hasEquity === "true";
 
@@ -63,7 +69,7 @@ router.get("/", async function (req, res, next) {
       throw new BadRequestError(errs);
     }
 
-    const jobs = await Job.findAll(q);
+    const jobs = await Job.findAll(payload.username, q);
     return res.json({ jobs });
   } catch (err) {
     return next(err);

@@ -101,13 +101,13 @@ class Company {
 
   /** Given a company handle, return data about company.
    *
-   * Returns { handle, name, description, numEmployees, logoUrl, jobs }
+   * Returns { handle, name, description, numEmployees, logoUrl, jobs, applied }
    *   where jobs is [{ id, title, salary, equity }, ...]
    *
    * Throws NotFoundError if not found.
    **/
 
-  static async get(handle) {
+  static async get(handle, username) {
     const companyRes = await db.query(
           `SELECT handle,
                   name,
@@ -123,13 +123,16 @@ class Company {
     if (!company) throw new NotFoundError(`No company: ${handle}`);
 
     const jobsRes = await db.query(
-          `SELECT id, title, salary, equity
+          `SELECT id, title, salary, equity,
+            CASE WHEN applications.job_id IS NOT NULL AND $2 = applications.username THEN true
+            ELSE false
+            END AS applied
            FROM jobs
-           WHERE company_handle = $1
-           ORDER BY id`,
-        [handle],
+           LEFT JOIN applications ON jobs.id = applications.job_id AND $2 = applications.username
+           WHERE jobs.company_handle = $1
+           ORDER BY jobs.id`,
+        [handle, username],
     );
-
     company.jobs = jobsRes.rows;
 
     return company;

@@ -173,7 +173,7 @@ describe("findAll", function () {
 
 describe("get", function () {
   test("works", async function () {
-    let company = await Company.get("c1");
+    let company = await Company.get("c1", "u1");
     expect(company).toEqual({
       handle: "c1",
       name: "C1",
@@ -181,10 +181,10 @@ describe("get", function () {
       numEmployees: 1,
       logoUrl: "http://c1.img",
       jobs: [
-        { id: testJobIds[0], title: "Job1", salary: 100, equity: "0.1" },
-        { id: testJobIds[1], title: "Job2", salary: 200, equity: "0.2" },
-        { id: testJobIds[2], title: "Job3", salary: 300, equity: "0" },
-        { id: testJobIds[3], title: "Job4", salary: null, equity: null },
+        { id: testJobIds[0], title: "Job1", salary: 100, equity: "0.1", applied: true },
+        { id: testJobIds[1], title: "Job2", salary: 200, equity: "0.2", applied: false},
+        { id: testJobIds[2], title: "Job3", salary: 300, equity: "0", applied: false },
+        { id: testJobIds[3], title: "Job4", salary: null, equity: null, applied: false },
       ],
     });
   });

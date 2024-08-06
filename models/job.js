@@ -41,20 +41,24 @@ class Job {
    * - hasEquity (true returns only jobs with equity > 0, other values ignored)
    * - title (will find case-insensitive, partial matches)
    *
-   * Returns [{ id, title, salary, equity, companyHandle, companyName }, ...]
+   * Returns [{ id, title, salary, equity, companyHandle, companyName, applied }, ...]
    * */
 
-  static async findAll({ minSalary, hasEquity, title } = {}) {
+  static async findAll(username, { minSalary, hasEquity, title } = {}) {
     let query = `SELECT j.id,
                         j.title,
                         j.salary,
                         j.equity,
                         j.company_handle AS "companyHandle",
-                        c.name AS "companyName"
-                 FROM jobs j 
-                   LEFT JOIN companies AS c ON c.handle = j.company_handle`;
+                        c.name AS "companyName",
+                        CASE WHEN applications.job_id IS NOT NULL AND $1 = applications.username THEN true
+                        ELSE false
+                        END AS applied
+                 FROM jobs AS j 
+                   LEFT JOIN companies AS c ON c.handle = j.company_handle
+                   LEFT JOIN applications on j.id = applications.job_id AND $1 = applications.username`;
     let whereExpressions = [];
-    let queryValues = [];
+    let queryValues = [username];
 
     // For each possible search term, add to whereExpressions and
     // queryValues so we can generate the right SQL

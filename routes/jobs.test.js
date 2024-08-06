@@ -85,8 +85,10 @@ describe("POST /jobs", function () {
 /************************************** GET /jobs */
 
 describe("GET /jobs", function () {
-  test("ok for anon", async function () {
-    const resp = await request(app).get(`/jobs`);
+  test("ok for logged in user", async function () {
+    const resp = await request(app)
+      .get(`/jobs`)
+      .set('authorization', `Bearer ${u1Token}`);
     expect(resp.body).toEqual({
           jobs: [
             {
@@ -96,6 +98,7 @@ describe("GET /jobs", function () {
               equity: "0.1",
               companyHandle: "c1",
               companyName: "C1",
+              applied: true
             },
             {
               id: expect.any(Number),
@@ -104,6 +107,7 @@ describe("GET /jobs", function () {
               equity: "0.2",
               companyHandle: "c1",
               companyName: "C1",
+              applied: false
             },
             {
               id: expect.any(Number),
@@ -112,6 +116,7 @@ describe("GET /jobs", function () {
               equity: null,
               companyHandle: "c1",
               companyName: "C1",
+              applied: false
             },
           ],
         },
@@ -121,6 +126,7 @@ describe("GET /jobs", function () {
   test("works: filtering", async function () {
     const resp = await request(app)
         .get(`/jobs`)
+        .set('authorization', `Bearer ${u1Token}`)
         .query({ hasEquity: true });
     expect(resp.body).toEqual({
           jobs: [
@@ -131,6 +137,7 @@ describe("GET /jobs", function () {
               equity: "0.1",
               companyHandle: "c1",
               companyName: "C1",
+              applied: true
             },
             {
               id: expect.any(Number),
@@ -139,6 +146,7 @@ describe("GET /jobs", function () {
               equity: "0.2",
               companyHandle: "c1",
               companyName: "C1",
+              applied: false
             },
           ],
         },
@@ -148,7 +156,8 @@ describe("GET /jobs", function () {
   test("works: filtering on 2 filters", async function () {
     const resp = await request(app)
         .get(`/jobs`)
-        .query({ minSalary: 2, title: "3" });
+        .query({ minSalary: 2, title: "3" })
+        .set('authorization', `Bearer ${u1Token}`);
     expect(resp.body).toEqual({
           jobs: [
             {
@@ -158,6 +167,7 @@ describe("GET /jobs", function () {
               equity: null,
               companyHandle: "c1",
               companyName: "C1",
+              applied: false
             },
           ],
         },
@@ -167,7 +177,8 @@ describe("GET /jobs", function () {
   test("bad request on invalid filter key", async function () {
     const resp = await request(app)
         .get(`/jobs`)
-        .query({ minSalary: 2, nope: "nope" });
+        .query({ minSalary: 2, nope: "nope" })
+        .set('authorization', `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(400);
   });
 });

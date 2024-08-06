@@ -150,8 +150,10 @@ describe("GET /companies", function () {
 /************************************** GET /companies/:handle */
 
 describe("GET /companies/:handle", function () {
-  test("works for anon", async function () {
-    const resp = await request(app).get(`/companies/c1`);
+  test("works for logged in", async function () {
+    const resp = await request(app)
+      .get(`/companies/c1`)
+      .set('authorization', `Bearer ${u1Token}`);
     expect(resp.body).toEqual({
       company: {
         handle: "c1",
@@ -160,16 +162,18 @@ describe("GET /companies/:handle", function () {
         numEmployees: 1,
         logoUrl: "http://c1.img",
         jobs: [
-          { id: testJobIds[0], title: "J1", equity: "0.1", salary: 1 },
-          { id: testJobIds[1], title: "J2", equity: "0.2", salary: 2 },
-          { id: testJobIds[2], title: "J3", equity: null, salary: 3 },
+          { id: testJobIds[0], title: "J1", equity: "0.1", salary: 1, applied: true},
+          { id: testJobIds[1], title: "J2", equity: "0.2", salary: 2, applied: false},
+          { id: testJobIds[2], title: "J3", equity: null, salary: 3, applied: false },
         ],
       },
     });
   });
 
-  test("works for anon: company w/o jobs", async function () {
-    const resp = await request(app).get(`/companies/c2`);
+  test("works for logged in: company w/o jobs", async function () {
+    const resp = await request(app)
+      .get(`/companies/c2`)
+      .set('authorization', `Bearer ${u1Token}`);
     expect(resp.body).toEqual({
       company: {
         handle: "c2",
@@ -183,7 +187,9 @@ describe("GET /companies/:handle", function () {
   });
 
   test("not found for no such company", async function () {
-    const resp = await request(app).get(`/companies/nope`);
+    const resp = await request(app)
+      .get(`/companies/nope`)
+      .set('authorization', `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(404);
   });
 });
