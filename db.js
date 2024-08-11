@@ -5,7 +5,7 @@ const { getDatabaseUri } = require("./config");
 
 // let DB_URI = getDatabaseUri();
 
-db = new Client({
+let db = new Client({
   connectionString: getDatabaseUri()
 })
 
