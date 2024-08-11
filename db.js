@@ -3,7 +3,11 @@
 const { Client } = require("pg");
 const { getDatabaseUri } = require("./config");
 
-DB_URI = getDatabaseUri();
+// let DB_URI = getDatabaseUri();
+
+db = new Client({
+  connectionString: getDatabaseUri();
+})
 
 db.connect();
 
